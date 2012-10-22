@@ -29,6 +29,16 @@
 						"userid": "anders@uninett.no",
 						"mail": "anders@uninett.no",
 						"name": "Anders Lund"
+					},
+					"Simon": {
+						"userid": "simon@uninett.no",
+						"mail": "simon@uninett.no",
+						"name": "Simon"
+					},
+					"Armaz": {
+						"userid": "armaz@uninett.no",
+						"mail": "armaz@uninett.no",
+						"name": "Armaz Mellati"
 					}
 			};
 			var $this = $(this);
@@ -48,7 +58,7 @@
 						var res = testRE.find("div.vrtx-person-search-hits");
 						res = res.find('tbody');
 						res = res.find('tr');
-						var tempNames = ['Terje Navjord', 'Andreas 흆re Solberg', 'Olav Morken', 'Anders Lund'];
+						var tempNames = ['Terje Navjord', 'Andreas 흆re Solberg', 'Olav Morken', 'Anders Lund', 'Simon', 'Armaz'];
 						if(res.length < 1){
 							letter = $this.val().length+1;
 						}
@@ -73,10 +83,10 @@
 				else if(updatedSource == true && $this.val().length<letter){
 					updatedSource = false;
 					var autocomplete = $this.typeahead();
-					autocomplete.data('typeahead').source = ['Terje Navjord', 'Andreas 흆re Solberg', 'Olav Morken', 'Anders Lund'];
+					autocomplete.data('typeahead').source = ['Terje Navjord', 'Andreas 흆re Solberg', 'Olav Morken', 'Anders Lund', 'Simon', 'Armaz'];
 				}
 			});
-			$this.typeahead({source: ['Terje Navjord', 'Andreas 흆re Solberg', 'Olav Morken', 'Anders Lund']});
+			$this.typeahead({source: ['Terje Navjord', 'Andreas 흆re Solberg', 'Olav Morken', 'Anders Lund', 'Simon', 'Armaz']});
 			$this.typeahead().change(function(){
 				if(memberList[$this.val()]){
 					settings.callback(memberList[$this.val()]);
