@@ -5,84 +5,274 @@
 		<title>Groupmanager running in UNINETT WebApp Park</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-		<!-- Le styles -->
-		<link href="/css/bootstrap.css" rel="stylesheet" />
-		<style>
-			body {
-				padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-			}
-			#searchDiv div:focus{
-				border: 1px solid #F88;
-			}
-			#searchInput input:focus{
-				border: none !important;
-			}
-			
-			input:focus{
-				border: none !important;
-				outline:none;
-			}
-			.groupView{
-				
-				border-left-color: #000;
-				border-left-width: 2px;
-				border-left-style:solid;
-			}
-			.topOfGV{
-				height:2px;
-				display:block;
-				width: 10px;
-				background-color: #000;
-			}
-			.bottomOfGV{
-				height:2px;
-				display:block;
-				width: 10px;
-				background-color: #000;
-				margin-top:4px;
-			}
-			.spacerDiv{
-				width:5px;
-				height:100%;
-			}
-			.groupMargin{
-				margin-left: 5px;
-			}
-			#detailsContainer{
-				align:center;
-			}
-			.topNav{
-				border-top-color: #000;
-				border-top-width: 1px;
-				border-top-style: solid;
-				border-bottom-color: #000;
-				border-bottom-width: 1px;
-				border-bottom-style: solid;
-			}
-		</style>
-		<link href="/css/bootstrap-responsive.css" rel="stylesheet" />
-		<link href="/css/style.css" rel="stylesheet" />
+
+<style>
+body {
+	padding-top: 60px;
+	/* 60px to make the container go all the way to the bottom of the topbar */
+}
+
+#searchDiv div:focus {
+	border: 1px solid #F88;
+}
+
+#searchInput input:focus {
+	border: none !important;
+	outline: none;
+}
+
+input:focus {
+	outline: none;
+}
+
+#peoplelist {
+	width: 450px;
+}
+
+#peoplesearch {
+	padding-left: 6px;
+}
+
+.uwap-people-main input:focus { /* 	background-color: #666; */
+	
+}
+
+.realmlist { /* 	background-color: #666; */
+	/* 	border-color: #000; */
+	/* 	-moz-border-radius: 10px; */
+	/* 	-webkit-border-radius: 10px; */
+	/* 	border-radius: 10px; */
+	/* 	color: #CCC; */
+	/* 	outline: none; */
+	
+}
+
+.groupView {
+	border-left-color: #000;
+	border-left-width: 2px;
+	border-left-style: solid;
+}
+
+.topOfGV {
+	height: 2px;
+	display: block;
+	width: 10px;
+	background-color: #000;
+	margin-bottom: -7px;
+}
+
+.bottomOfGV {
+	height: 2px;
+	display: block;
+	width: 10px;
+	background-color: #000;
+	margin-top: 4px;
+}
+
+.spacerDiv {
+	width: 5px;
+	height: 100%;
+}
+
+.groupMargin {
+	margin-left: 5px;
+}
+
+#detailsContainer {
+	align: center;
+}
+
+#peoplelist li {
+	border-top: 1px solid #eee;
+}
+
+.topNav {
+	border-top-color: #000;
+	border-top-width: 1px;
+	border-top-style: solid;
+	border-bottom-color: #000;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+table .header {
+	cursor: pointer;
+}
+
+table .header:after {
+	content: "";
+	float: right;
+	margin-top: 7px;
+	border-width: 0 4px 4px;
+	border-style: solid;
+	border-color: #000000 transparent;
+	visibility: hidden;
+}
+
+table .headerSortUp,table .headerSortDown {
+	background-color: #f7f7f9;
+	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+}
+
+table .header:hover:after {
+	visibility: visible;
+}
+
+table .headerSortDown:after,table .headerSortDown:hover:after {
+	visibility: visible;
+	filter: alpha(opacity =       60);
+	-moz-opacity: 0.6;
+	opacity: 0.6;
+}
+
+table .headerSortUp:after {
+	border-bottom: none;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 4px solid #000000;
+	visibility: visible;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	filter: alpha(opacity =       60);
+	-moz-opacity: 0.6;
+	opacity: 0.6;
+}
+</style>
 
 		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
 		<!--[if lt IE 9]>
 			<script src="/js/bootstrap/html5.js"></script>
 		<![endif]-->
 
-
-		<!-- JQuery hosted by Google -->
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
-
 		<!-- Core API to UNINETT WebApp Park -->
-		<script type="text/javascript" src="/_/js/oauth.js"></script>
-		<script type="text/javascript" src="/_/js/core.js"></script>
 
 		<!-- data-main attribute tells require.js to load
 		scripts/main.js after require.js loads. -->
-		<script data-main="js/main" src="js/requirejs/require.js"></script>
+		<script type="text/javascript" data-main="main" src="/_/js/require.js"></script>
 		<script src="js/lib/director-1.1.6.min.js"></script>
-		
+<!-- 		<script src="js/lib/jquery.tablesorter.js"></script> -->
+	
+		<!-- 	Group-details container -->
+		<script id="detCont" type="text/x-jsrender" >
 
-		<!-- Le fav and touch icons -->
+			<div id="detailsContainer" class="container span8 offset2" >
+				<div class="topNav">
+					<a id="groupBack" href="#">Groups</a> <span> &#62; {{>id}} </span>
+				</div>
+				<div class="container"  style="padding-left:15px; padding-top: 10px;">
+					<div id="titleContainer">
+						<h1 id="titleHeader">{{>title}}
+						
+						</h1>
+					</div>
+					<div id="descriptContainer"> 	<h2>Description </h2>
+							<span id="descriptionSpan">{{>description}}</span>
+					</div>
+					<div id="checkContainer"><br/></div>
+					
+					<div>
+						<br/><br /><h2>Members</h2>
+						<table id="membersTable" class="table table-striped">
+							<thead>
+								<tr>
+									<th></th>
+									<th>Name</th>
+									<th>Mail</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody id="allMem">
+							
+							</tbody>
+						</table>
+					</div>
+					{{if you.admin || you.owner}}
+					<br /><br /><h2>Add</h2>
+					<div style="border: 0px solid #DDD; background-color: white !important;">
+						
+						<input style="font-size:16px; height:18px; padding-top:4px; padding-left:9px; width:300px" class="search-query" id="peoplesearch" placeholder="Type to search for people..."/>
+						
+					</div>
+					{{/if}}
+					
+				</div>
+
+			</div>
+			
+		</script>
+	
+<!-- 	Used for admins who can edit. allMembersNormal is used for info only.. -->
+		<script id="allMembers" type="text/x-jsrender" >
+			
+				<tr>
+					<td>{{if admin}} <img src="img/admin.png" height="16" width="16"/> 
+						{{else member}} <img src="img/user.png" height="16" width="16" />
+						{{/if}}
+					</td>
+					<td>
+						{{>name}}
+					</td>
+					<td>
+						{{>mail}}
+					</td>
+					<td><button memid="{{>userid}}" class="btn btn-danger btn-mini removeButton" onclick="console.log('{{>userid}}');">X</button>
+					{{if admin}} <button memid="{{>userid}}" class="btn btn-warning btn-mini demoteButton" onclick="console.log(this);">Demote</button>
+					
+					{{else}} <button memid="{{>userid}}" class="btn btn-success btn-mini promoteButton">Promote</button>
+					{{/if}}
+					</td>
+				</tr>
+				
+		</script>
+		
+		<script id="allMembersNormal" type="text/x-jsrender" >
+			
+				<tr>
+					<td>{{if admin}} <img src="img/admin.png" height="16" width="16"/> 
+						{{else member}} <img src="img/user.png" height="16" width="16" />
+						{{/if}}
+					</td>
+					<td>
+						{{>name}}
+					</td>
+					<td>
+						{{>mail}}
+					</td>
+					<td>
+					</td>
+				</tr>
+				
+		</script>
+
+		<script id="createGroupModal" type="text/x-jsrender">
+			<div class="modal-header">
+					<button href="#" type="button" class="close" data-dismiss="modal">x</button>
+					<h3>Create new group</h3>
+				</div>
+				<div class="modal-body">
+					Title: <br /><input width="100%" id="newTitle"></input><br /><br />
+					Description: <br /><textarea rows="4" style="width:400px;" width="300px" id="newDescription"></textarea><br />
+					<div id="memberList"></div>
+					<input type="checkbox" id="newListing"> List publicly and allow subscriptions</input>
+				</div>
+				<div class="modal-footer">
+					<a href="#" class="btn" data-dismiss="modal">Close</a> <a href="#"
+						class="btn btn-primary" id="saveChanges">Save changes</a>
+				</div>
+
+		</script>
+		
+		<script id="listGroup" type="text/x-jsrender">
+			<div class="groupView"><div class="topOfGV"></div><div class="spacerDiv"></div><h4 class="groupMargin">{{>title}}</h4>
+				{{if description}}<span class="groupMargin">{{>description}}</span><br />{{/if}}
+
+			
+			</div>
+
+		</script>
+
+<!-- Le fav and touch icons -->
 		<link rel="shortcut icon" href="/ico/favicon.ico">
 		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/ico/apple-touch-icon-144-precomposed.png">
 		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
@@ -100,10 +290,10 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</a>
-					<a class="brand" href="#">Groupmanager</a>
+					<a class="brand" id="brandTitle" href="#">Groupmanager</a>
 					<div class="nav-collapse">
 						<ul class="nav">
-							<li class="active"><a href="#">Home</a></li>
+<!-- 							<li class="active"><a href="#">Home</a></li> -->
 						</ul>
 					</div><!--/.nav-collapse -->
 				</div>
@@ -112,14 +302,15 @@
 
 		<div class="container" id="mainContainer">
 			
-			<div class="span4 offset2" style="border: 1px solid #DDD; width:300px; float:left; -moz-border-radius: 10px; -webkit-border-radius:10px; border-radius: 10px;  font-size: 20px; padding: 2px 4px; outline: 0; -webkit-appearance:none;" id="searchDiv" align="center">
+			<div class="span4 offset2" style="border: 1px solid #DDD; width:310px; float:left; -moz-border-radius: 10px; -webkit-border-radius:10px; border-radius: 10px;  font-size: 20px; padding: 2px 4px; outline: 0; -webkit-appearance:none;" id="searchDiv" align="center">
     			<img height="16px" width="16px" src=" img/search.png" id="searchIcon"/>
     			<input style="border: none; width:255px; padding-top:3px; font-size:16px;" id="searchInput" placeholder="Type to filter..."/>
-    			<img src="img/cancel.png" id="searchCancel"/>
+<!--     			<img src="img/cancel.png" id="searchCancel"/> -->
+    			<a href="javascript:void(0)"  id="searchCancel" class="btn btn-danger btn-mini">X</a>
 			</div>
 			<div id="managecontainer">
 			<div><div id="myOwnGroups"></div>
-			<div><a class="btn btn-success btn-small" href="javascript:void(0)" id="addOwnGroup" style="float:left; margin-left:20px;"><i class="icon-plus"></i>Create group</a></div>
+			<div><a class="btn btn-small" href="javascript:void(0)" id="addOwnGroup" style="float:left; margin-left:20px; margin-top:2px; padding-left:-5px; " ><i class="icon-plus"></i> Create group</a></div>
 			</div>
 			<div style="display:block;" >
 			<br /><br /><br />
@@ -150,10 +341,10 @@
 		
 		<!-- ========================================================== -->
 		<!-- Placed at the end of the document so the pages load faster -->
-		<script src="/js/bootstrap/bootstrap-collapse.js"></script>
-		<script src="/js/bootstrap/bootstrap-modal.js"></script>
-		<script src="/js/bootstrap/bootstrap-typeahead.js"></script>
-		<script src="/js/bootstrap/bootstrap-button.js"></script>
+<!-- 		<script src="/js/bootstrap/bootstrap-collapse.js"></script> -->
+<!-- 		<script src="/js/bootstrap/bootstrap-modal.js"></script> -->
+<!-- 		<script src="/js/bootstrap/bootstrap-typeahead.js"></script> -->
+<!-- 		<script src="/js/bootstrap/bootstrap-button.js"></script> -->
 	
 		<!--
 			Add only the ones you are using.

@@ -1,5 +1,19 @@
 //Router from: https://github.com/flatiron/director
-require([ 'js/kontakt.jquery.js'], function(){
+define(function(require, exports, module) {
+
+	var 
+		$ = require('jquery'),
+		
+		UWAP = require('uwap-core/js/core');
+	
+	require("lib/jsrender");
+	require("uwap-core/js/uwap-people");
+	require('uwap-core/bootstrap/js/bootstrap');	
+	require('uwap-core/bootstrap/js/bootstrap-collapse');
+	require('uwap-core/bootstrap/js/bootstrap-modal');
+	require('uwap-core/bootstrap/js/bootstrap-typeahead');
+	require('uwap-core/bootstrap/js/bootstrap-button');
+	
 	var currentGroup = null;
 	
 	$(document).ready(function() {
@@ -32,65 +46,57 @@ require([ 'js/kontakt.jquery.js'], function(){
 		this.groupView;
 		this.me;
 		this.breaks;
+		this.listable;
 	};
 	
-	Group.prototype.getId = function(){
-		return this.id;
-	};
-	
-	Group.prototype.getName = function(){
-		return this.name;
-	};
-	
-	Group.prototype.getDescription = function(){
-		return this.description;
-	};
-
-	Group.prototype.getMembers = function(){
-		return this.members;
-	};
-	
-	Group.prototype.getAdmins = function(){
-		return this.admins;
-	};
-	
-	Group.prototype.getOwners = function(){
-		return this.owners;
-	};
-	
-	Group.prototype.removeGroup = function(groupView){
+	Group.prototype.removeGroup = function(groupView, breaks){
 		if(confirm("Delete the group?")){
 			UWAP.groups.removeGroup(this.id, function(){
 				groupView.empty();
-				this.breaks.remove();
+				breaks.remove();
 			}, updateError);
 		}
+	};
+	
+	Group.prototype.setListing = function(bool){
+		this.listable = bool;
+		UWAP.groups.updateGroup(this.id, {'listable' : bool}, updateSuccess, updateError);
+		
 	};
 	
 	Group.prototype.addMember = function(member){
 		var gr = this;
 		if(this.members.indexOf(member.userid[0])==-1){
-			this.members.push(member.userid[0]);
-			this.userlist[member.userid[0]] = {"admin": false, "member": true, "name": member.name[0], "userid": member.userid[0], "mail": member.mail[0] };
-			UWAP.groups.addMember(this.id, { "userid": member.userid[0], "name": member.name[0], "jpegphoto": member.jpegphoto[0]}, function(){
+			var memObj = { "userid": member.userid[0] }
+			if(member.name[0]){
+				memObj.name = member.name[0];
+			}
+			if(member.mail[0]){
+				memObj.mail = member.mail[0];
+			}
+			UWAP.groups.addMember(this.id, memObj, function(){
 				
-				gr.membersView();
-			}, updateError);
+				gr.members.push(member.userid[0]);
+				gr.userlist[member.userid[0]] = {"admin": false, "member": true, "name": member.name[0], "userid": member.userid[0], "mail": member.mail[0] };
+				gr.allMembersView();
+			}, function(err){
+				alert(err);
+			});
 		}
 	};
 	
 	Group.prototype.promoteMember = function(member){
 		var gr = this;
 		this.admins.push(member);
-		
+		this.userlist[member].admin = true;
 		UWAP.groups.updateMember(this.id, member, {'admin': true}, function(){
-			gr.adminsView();
-			gr.membersView();
+			gr.allMembersView();
 		}, updateError);
 	};
 	
 	Group.prototype.demoteMember = function(admin){
 		var gr = this;
+		this.userlist[admin].admin = false;
 		var tempAdmin = this.admins.indexOf(admin);
 		if(tempAdmin!=-1) admin = this.admins.splice(tempAdmin, 1);
 		
@@ -100,8 +106,7 @@ require([ 'js/kontakt.jquery.js'], function(){
 		}
 		
 		UWAP.groups.updateMember(this.id, admin, {'admin': false}, function(){
-			gr.adminsView();
-			gr.membersView()
+			gr.allMembersView();
 		}, updateError);
 	};
 	
@@ -113,8 +118,7 @@ require([ 'js/kontakt.jquery.js'], function(){
 		var tempAdmin = this.admins.indexOf(member);
 		if(tempAdmin!=-1) this.admins.splice(tempAdmin, 1);
 		UWAP.groups.removeMember(this.id, member, function(){
-			gr.membersView();
-			gr.adminsView();
+			gr.allMembersView();
 			$("#peoplesearch").keyup();
 			if(member == gr.me.userid){
 				gr.listView();
@@ -133,7 +137,7 @@ require([ 'js/kontakt.jquery.js'], function(){
 	
 	Group.prototype.setName = function(newName){
 		this.title = newName;
-		this.groupView.find('h3').empty().append(newName);
+		this.groupView.find('h4').empty().append(newName);
 		UWAP.groups.updateGroup(this.id, {'title': newName}, updateSuccess, updateError);
 	};
 	
@@ -144,17 +148,11 @@ require([ 'js/kontakt.jquery.js'], function(){
 		var gr = this;
 		var hidden = false;
 		
-		if(this.description){
-			groupView = $('<div class="groupView"><div class="topOfGV"></div><div class="spacerDiv"></div><h3 class="groupMargin">'+this.title+'</h3>'
-				+'<span class="groupMargin">'+this.description+'</span><br />'
-				+'</div>').appendTo('#myGroups');
-		}
-		else{
-			groupView = $('<div class="groupView"><div class="topOfGV"></div><h3 class="groupMargin">'+this.title+'</h3>'
-					+'<span class="groupMargin"></span></div>').appendTo('#myGroups');
-		}
+		//Most of the HTML is done in the template
+		groupView = $( $('#listGroup').render(gr) );
+		$('#myGroups').append(groupView);
 		
-		
+		//Some html added after
 		if(this.admin == false && this.owner == false){
 			if(this.listmembers){
 				var gr = this;
@@ -170,12 +168,12 @@ require([ 'js/kontakt.jquery.js'], function(){
 
 			}).appendTo(groupView);
 			$('<a href="javascript:void(0)" class="btn btn-danger btn-mini">Delete</a>').click(function(){
-				gr.removeGroup(groupView);
+				gr.removeGroup(groupView, breaks);
 			}).appendTo(groupView);
 			
 		}
 		$('<div class="bottomOfGV"></div>').appendTo(groupView);
-		var breaks = $('<br /><br /><br /><br />').appendTo('#myGroups');
+		var breaks = $('<br /><br /><br />').appendTo('#myGroups');
 		this.breaks = breaks;
 		this.groupView = groupView;
 		
@@ -204,140 +202,122 @@ require([ 'js/kontakt.jquery.js'], function(){
 	//Opens an info/edit-page for the group. 
 	Group.prototype.editView = function(){
 		var gr = this;
-		console.log('editview: ');
-		console.log(this);
 		var mainContainer = $('#mainContainer').hide();
-		 
 		$('#detailsContainer').remove();
-		var detailsContainer = $('<div id="detailsContainer" class="container span8 offset2" ></div>').appendTo('body');
-		var topNav = $('<div class="topNav"></div>').appendTo(detailsContainer);
-		$('<a href="#">Groups</a>').appendTo(topNav).click(function(){detailsContainer.remove();mainContainer.show();});
-		$('<span> &#62; '+gr.id+'</span>').appendTo(topNav);
-//		$().appendTo(topNav);
 		
-		var detailsContainer2 = $('<div class="container"  style="padding-left:15px; padding-top: 10px;"></div').appendTo(detailsContainer);
+		//Append the edit-container, containing most of the html, to body
+		$('body').append( $('#detCont').render(gr) );
 		
-		var titleContainer = $('<div></div>').appendTo(detailsContainer2); 
-		var title = $('<h1>'+this.title+'</h1>').appendTo(titleContainer);	
+		$('#groupBack').click(function(){
+			$('#detailsContainer').remove();mainContainer.show();
+		});
+		
+		//Puts rows in the members-table
+		gr.allMembersView();
+//		$('#membersTable').dataTable();
+		
+		//Adds edit-buttons to title and description if owner or admin
 		if(gr.you.admin || gr.you.owner){
 			console.log('is owner or admin');
-			$(' <a style="margin-left: 10px;" href="javascript:void(0)" class="btn btn-primary btn-mini"> Edit</a>').appendTo(title).click(function(){
-				gr.makeTitleEditor(titleContainer);
+			$(' <a style="margin-left: 10px;" href="javascript:void(0)" class="btn btn-primary btn-mini"> Edit</a>').appendTo('#titleHeader').click(function(){
+				gr.makeTitleEditor($('#titleContainer'));
 			});
+			defaultDescr($('#descriptContainer'), gr);
 		}
 		
-		var descriptionContainer = $('<div> <h2>Description </h2><span>'+this.description+'</span></div>').appendTo(detailsContainer2);
-		if(this.admin || this.owner){
-			defaultDescr(descriptionContainer, gr);
+		var check = $('<input type="checkbox"> List publicly and allow subscriptions</input>').appendTo('#checkContainer').click(function(){
+			if(gr.you.admin || gr.you.owner){
+				gr.setListing($(this).is(':checked'));
+			}
+			else{
+				if($(this).is(':checked')){
+					$(this).prop('checked', false);
+				}
+				else{
+					$(this).prop('checked', true);
+				}				
+			}
+		});
+		
+		if(gr.listing){
+			check.attr('checked', true);
 		}
-		
-		var adminsContainer = $('<div id="admins"><div>').appendTo(detailsContainer2);
-		gr.adminsView();
-		
-		
-		
-		var membersContainer = $('<div id="members"></div>').appendTo(detailsContainer2);
-		gr.membersView();
 		
 		
 		if(gr.you.admin || gr.you.owner){
-			$('<br /><br /><h2>Add</h2>').appendTo(detailsContainer2);
-			var sDiv= $('<div style="border: 1px solid #DDD; width:300px;"></div>').appendTo(detailsContainer2);
-			$('<img height="16px" width="16px" src=" img/search.png"/>').appendTo(sDiv);
-			var search = $(' <input style="border: none; width:280px" id="peoplesearch" placeholder="Type to search..."/>').appendTo(sDiv);
-
-			var pres = $('<div id="pres"></div>').appendTo(detailsContainer2);
-			$("#peoplesearch").on('keyup', function() {
-				var q = $("#peoplesearch").val();
-				console.log('search: ', q);
-
-
-				if (q.length < 2) return;
-
-				UWAP.people.query(q, function(data) {
-					$("#pres").empty();
-					$.each(data, function(i, item) {
-						if(item.userid && gr.members.indexOf(item.userid[0])==-1){
-							var e = $('<div style="clear: both"></div>');
-							if (item.jpegphoto) {
-								e.append('<img class="img-polaroid" style="margin: 5px; float: left; max-height:'
-										+'64px; border: 1px solid #ccc" src="data:image/jpeg;base64,' 
-										+ item.jpegphoto
-										+ '" />');
-							}
-							var iName = $('<h3 style="margin: 0px;">' + item.name + ' </h3>').appendTo(e);
-
-							$("#pres").append(e);
-
-							$(' <button type="button" class="btn btn-success btn-mini">Add</button>').appendTo(iName).click(function(){
-								gr.addMember(item);
-								e.remove();
-							});
-
-							var e2 = '<p><span style="margin-right: 15px;"><i class="icon-briefcase"></i> ' +
-							item.o + '</span>';
-							e2 += '<span style="margin-right: 15px;"><i class="icon-user"></i> ' +
-							item.userid + '</span>';
-							e2 += '<span style="margin-right: 15px;"><i class="icon-envelope"></i> ' +
-							item.mail + '</span></p>';
-							e.append(e2);
-						}
-						
-
-
-					});
-				});
+			var ps = $("#peoplesearch").focus().peopleSearch({
+				callback: function(item) {
+		            gr.addMember(item);
+		            ps.focus();
+		        }
+			});
+			ps.focus(function(){
+				ps.css('border-color', '#DDAA33');
+			});
+			ps.blur(function(){
+				ps.css('border-color', '#DDD');
+			});
+			ps.focus();
+			ps.keyup(function(e){
+				if(e.which==27){
+					ps.val('');
+					ps.keyup();
+				}
 			});
 		}
+		$('#groupBack').click( function(){
+			$('#searchInput').focus();
+		});
 		
-	};
-	
-	Group.prototype.adminsView = function() {
-		var gr = this;
-		var tempUser;
-		var adminsContainer = $('#admins');
-		adminsContainer.empty().append('<br /><br /><h2>Admins</h2>');
-		$.each(this.admins, function(i,v){
-			if(gr.userlist[v]){
-				tempUser = $('<h3>'+gr.userlist[v].name+' </h3>').appendTo(adminsContainer);
-
-				if(gr.you.admin || gr.you.owner){
-					$('<a style="margin-left: 10px;" href="javascript:void(0)" class="btn btn-warning btn-mini">Demote</a><br />').appendTo(tempUser).click(function(){
-						gr.demoteMember(v);
-					});
-				}
-
-				$('<span style="margin-right: 15px;"><i class="icon-user"></i> ' +
-						gr.userlist[v].userid + '</span>').appendTo(adminsContainer);
-				$('<span style="margin-right: 15px;"><i class="icon-envelope"></i> ' +
-						gr.userlist[v].mail + '</span></p>').appendTo(adminsContainer);
-			}
+		$('#brandTitle').click(function(){
+			$('#groupBack').click();
 		});
 	};
 	
-	Group.prototype.membersView = function(){
+	//Puts rows in the members-table
+	Group.prototype.allMembersView = function() {
 		var gr = this;
-		var tempUser;
-		var membersContainer = $('#members');
-		
-		membersContainer.empty().append('<br /><br /><h2>Regular Members</h2>');
-		$.each(this.members, function(i, v){
-			if(gr.userlist[v] && gr.admins.indexOf(v) == -1){
-				tempUser = $('<h4>'+gr.userlist[v].name+' </h4>').appendTo(membersContainer);
+		$('#allMem').empty();
+		$.each(this.admins, function(i,v){
+			if(gr.userlist[v]){
 				if(gr.you.admin || gr.you.owner){
-					$(' <a style="margin-left: 10px;" href="javascript:void(0)" class="btn btn-danger btn-mini">X</a> ').appendTo(tempUser).click(function(){
-						gr.removeMember(v);
-					});
-					$(' <button height="16px" href="javascript:void(0)" class="btn btn-success btn-mini">Promote</button><br />').appendTo(tempUser).click(function(){
-						gr.promoteMember(v);
-					});
+					console.log('admin+admin');
+					$('#allMem').append(
+							$('#allMembers').render(gr.userlist[v], {gr:gr})
+					);
 				}
-				
-				$('<span style="margin-right: 15px;"><i class="icon-user"></i> ' +
-						gr.userlist[v].userid + '</span>').appendTo(membersContainer);
-				$('<span style="margin-right: 15px;"><i class="icon-envelope"></i> ' +
-						gr.userlist[v].mail + '</span></p>').appendTo(membersContainer);
+				else{
+					$('#allMem').append(
+							$('#allMembersNormal').render(gr.userlist[v], {gr:gr})
+					);
+				}
 			}
+		});
+		$.each(this.members, function(i,v){
+			if(gr.userlist[v] && gr.admins.indexOf(v) == -1){
+				if(gr.you.admin || gr.you.owner){
+					$('#allMem').append(
+							$('#allMembers').render(gr.userlist[v], {gr:gr})
+					);
+				}
+				else{
+					$('#allMem').append(
+							$('#allMembersNormal').render(gr.userlist[v], {gr:gr})
+					);
+				}
+			}
+		});
+		$('.removeButton').click(function(){
+			var mem = $(this).attr('memid');
+			gr.removeMember(mem);
+		});
+		$('.demoteButton').click(function(){
+			var mem = $(this).attr('memid');
+			gr.demoteMember(mem);
+		});
+		$('.promoteButton').click(function(){
+			var mem = $(this).attr('memid');
+			gr.promoteMember(mem);
 		});
 	};
 	
@@ -345,12 +325,17 @@ require([ 'js/kontakt.jquery.js'], function(){
 		var gr = this;
 		titleContainer.empty();
 		var editDiv = $('<div></div>').appendTo(titleContainer);
-		var title = $('<input style="font-size:20px;" />').appendTo(editDiv).val(gr.title);
-		$('<a href="javascript:void(0)" class="btn btn-success">Save</a>').click( function(){
+		var title = $('<input style="font-size:24px;" />').appendTo(editDiv).val(gr.title);
+		var sButton = $('<a href="javascript:void(0)" class="btn btn-success">Save</a>').click( function(){
 			gr.setName(title.val());
 			gr.makeNormalTitle(titleContainer);
 		}).appendTo(editDiv);
-		
+		title.focus();
+		title.keyup(function(e){
+			if(e.which==13){
+				sButton.click();
+			}
+		});
 	};
 	
 	Group.prototype.makeNormalTitle = function(titleContainer){
@@ -373,7 +358,7 @@ require([ 'js/kontakt.jquery.js'], function(){
 	function editDesc(descriptionContainer,gr){
 		descriptionContainer.empty();
 				$('<h2>Description<h2>').appendTo(descriptionContainer);
-				var tArea = $('<textarea width="500">'+gr.description+'</textarea>').appendTo(descriptionContainer);
+				var tArea = $('<textarea rows="4" style="width:400px;">'+gr.description+'</textarea>').appendTo(descriptionContainer);
 				var saveButton = $('<a href="javascript:void(0)" class="btn btn-success">Save</a>').appendTo(descriptionContainer).click(function(){
 					gr.setDescription(tArea.val());
 					tArea.remove();
@@ -381,6 +366,7 @@ require([ 'js/kontakt.jquery.js'], function(){
 					$('<span>'+gr.description+'</span>').appendTo(descriptionContainer);
 					defaultDescr(descriptionContainer, gr);
 				});
+				tArea.focus();
 	}
 	
 	
@@ -408,10 +394,8 @@ require([ 'js/kontakt.jquery.js'], function(){
 	}
 	
 	function init(u){
-		console.log(u); 
 		 var  groupHandler = function(id){
 			 UWAP.groups.get(id, function(d){
-				 console.log(d);
 				 if(d==null){
 					 return null;
 				 }
@@ -424,6 +408,9 @@ require([ 'js/kontakt.jquery.js'], function(){
 					 else{
 						 gr = new Group(d.id, d.title, d.you.admin, d.you.member, d.you.owner, true);
 					 }
+				 }
+				 if(d.listable !=undefined){
+					 gr.listable = d.listable;
 				 }
 				 gr.admins = d.admins;
 				 gr.members = d.members;
@@ -469,6 +456,9 @@ require([ 'js/kontakt.jquery.js'], function(){
 						else{
 							dGroup = new Group(v.id, v.title, v.admin, v.member, v.owner, v.listmembers);
 						}
+						if(v.listing){
+							dGroup.listing = v.listing;
+						}
 						console.log(dGroup);
 						myGroups.push(dGroup);
 						dGroup.listView();
@@ -478,30 +468,48 @@ require([ 'js/kontakt.jquery.js'], function(){
 			
 		});
 		var search = $('#searchInput').change(function(){console.log('inputChanged')});
-		$('#searchCancel').click(function(){search.val(''); search.keyup(); console.log('searchCancelled');});
+		var sCancel = $('#searchCancel').click(function(){search.val(''); search.focus(); console.log('searchCancelled');});
+		search.keyup(function(e){
+			if(search.val().length > 0){
+				sCancel.css("opacity", "1.0");
+			}
+			else{
+				sCancel.css("opacity", "0.6");
+			}
+			//27 is escape-key
+			if(e.which == 27){
+				sCancel.click();
+			}
+		});
+		search.focus(function(){
+			search.keyup();
+		});
+		
+		var sd = $('#searchDiv');
+		search.focus(function(){
+			sd.css('border-color', '#DDAA22');
+		});
+		search.blur(function(){
+			sd.css('border-color', '#DDD');
+		});
 		search.focus();
 		
 		$('#addOwnGroup').click(function(){
 			administerGroup('new');
+			$('#newTitle').focus();
 		});
+		
 	}
+	
+	//Now only does the create group-modal
 	function administerGroup(group){
 		if(group=='new'){
-			$('.modal-header').html(
-					'<button href="#" type="button" class="close" data-dismiss="modal">x</button>'
-					+'<h3>Create new group</h3>'
-					);
-			$('.modal-body').html(
-					'Title: <br /><input width="100%" id="newTitle"></input><br /><br />'
-					+'Description: <br /><textarea rows="4" style="width:400px;" width="300px" id="newDescription"></textarea><br />'
-					+'<div id="memberList"></div>'
-			);
-			$('.modal-footer').html(
-					'<a href="#" class="btn" data-dismiss="modal">Close</a> <a href="#"'
-						+' class="btn btn-primary" id="saveChanges">Save changes</a>'
+			$('#myModal').html(
+					$('#createGroupModal').render()
 			);
 			$('#saveChanges').click(function(){
-				UWAP.groups.addGroup({ title: $('#newTitle').prop('value'), description: $('#newDescription').prop('value')},
+				
+				UWAP.groups.addGroup({ title: $('#newTitle').prop('value'), description: $('#newDescription').prop('value')}, //  listable : $('#newListing').prop('checked')},
 						function(d){
 					var dGroup;
 					if(d.description){
@@ -510,16 +518,12 @@ require([ 'js/kontakt.jquery.js'], function(){
 					else{
 						dGroup = new Group(d.id, d.title, d.you.admin, d.you.member, d.you.owner, true);
 					}
-					console.log(dGroup);
 					myGroups.push(dGroup);
 					dGroup.listView();
 				}, errorCatch);
 				$('#myModal').modal('toggle');
 				
 			});
-			//$('#addMember').kontakt({ callback: function(member) {memberAdded(group, member);}});
-			
-			
 		}
 		$('#myModal').modal('show');
 	}
