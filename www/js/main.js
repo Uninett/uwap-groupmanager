@@ -239,7 +239,7 @@ define(function(require, exports, module) {
 			}
 		});
 		
-		if(gr.listing){
+		if(gr.listable){
 			check.attr('checked', true);
 		}
 		
@@ -508,8 +508,8 @@ define(function(require, exports, module) {
 					$('#createGroupModal').render()
 			);
 			$('#saveChanges').click(function(){
-				
-				UWAP.groups.addGroup({ title: $('#newTitle').prop('value'), description: $('#newDescription').prop('value')}, //  listable : $('#newListing').prop('checked')},
+				if($('#newTitle').prop('value') != ''){
+					UWAP.groups.addGroup({ title: $('#newTitle').prop('value'), description: $('#newDescription').prop('value'), listable : $('#newListing').prop('checked')},
 						function(d){
 					var dGroup;
 					if(d.description){
@@ -518,11 +518,19 @@ define(function(require, exports, module) {
 					else{
 						dGroup = new Group(d.id, d.title, d.you.admin, d.you.member, d.you.owner, true);
 					}
+					if(d.listable !=undefined){
+						dGroup.listable = d.listable;
+					}
 					myGroups.push(dGroup);
 					dGroup.listView();
-				}, errorCatch);
-				$('#myModal').modal('toggle');
-				
+					}, errorCatch);
+					$('#myModal').modal('toggle');
+					document.location.href='https://groupmanager.uwap.org/#';
+				}
+				else{
+					alert('Cannot create a group without a title.');
+					$('#newTitle').focus();
+				}
 			});
 		}
 		$('#myModal').modal('show');

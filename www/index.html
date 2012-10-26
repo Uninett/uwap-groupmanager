@@ -188,7 +188,7 @@ table .headerSortUp:after {
 						</table>
 					</div>
 					{{if you.admin || you.owner}}
-					<br /><br /><h2>Add</h2>
+					<br /><h2>Add</h2>
 					<div style="border: 0px solid #DDD; background-color: white !important;">
 						
 						<input style="font-size:16px; height:18px; padding-top:4px; padding-left:9px; width:300px" class="search-query" id="peoplesearch" placeholder="Type to search for people..."/>
@@ -258,14 +258,14 @@ table .headerSortUp:after {
 				</div>
 				<div class="modal-footer">
 					<a href="#" class="btn" data-dismiss="modal">Close</a> <a href="#"
-						class="btn btn-primary" id="saveChanges">Save changes</a>
+						class="btn btn-primary" id="saveChanges">Create group</a>
 				</div>
 
 		</script>
 		
 		<script id="listGroup" type="text/x-jsrender">
 			<div class="groupView"><div class="topOfGV"></div><div class="spacerDiv"></div><h4 class="groupMargin">{{>title}}</h4>
-				{{if description}}<span class="groupMargin">{{>description}}</span><br />{{/if}}
+				<span class="groupMargin">{{if description}}{{>description}}<br />{{/if}}</span>
 
 			
 			</div>
@@ -329,7 +329,7 @@ table .headerSortUp:after {
 				</div>
 				<div class="modal-footer">
 					<a href="#" class="btn" data-dismiss="modal">Close</a> <a href="#"
-						class="btn btn-primary">Save changes</a>
+						class="btn btn-primary">Save</a>
 				</div>
 			</div>
 		</div>
