@@ -3,16 +3,24 @@ define(function(require, exports, module) {
 
 	var 
 		$ = require('jquery'),
-		
+		hogan = require('uwap-core/js/hogan'),
 		UWAP = require('uwap-core/js/core');
 	
-	require("lib/jsrender");
+	//require("lib/jsrender");
 	require("uwap-core/js/uwap-people");
 	require('uwap-core/bootstrap/js/bootstrap');	
 	require('uwap-core/bootstrap/js/bootstrap-collapse');
 	require('uwap-core/bootstrap/js/bootstrap-modal');
 	require('uwap-core/bootstrap/js/bootstrap-typeahead');
 	require('uwap-core/bootstrap/js/bootstrap-button');
+	
+	var tmpl = {
+		    "detCont": require('uwap-core/js/text!templates/detailsContainer.html'),
+		    "allMembers": require('uwap-core/js/text!templates/allMembers.html'),
+		    "allMembersNormal":  require('uwap-core/js/text!templates/allMembersNormal.html'),
+		    "createGroupModal": require('uwap-core/js/text!templates/createGroupModal.html'),
+		    "listGroup": require('uwap-core/js/text!templates/listGroup.html')
+	};
 	
 	var currentGroup = null;
 	
@@ -24,6 +32,9 @@ define(function(require, exports, module) {
 	
 	// Keeps a list of all groups
 	var myGroups = new Array();
+	var otherTemplates = {
+			"createGroupModal": hogan.compile(tmpl.createGroupModal)
+	};
 	
 	// Model for groups
 	var Group = function(id, title, adminBool, memberBool, ownerBool, listMembersBool, description){
@@ -47,6 +58,13 @@ define(function(require, exports, module) {
 		this.me;
 		this.breaks;
 		this.listable;
+		
+		this.templates = {
+			"detCont": hogan.compile(tmpl.detCont),
+			"allMembers": hogan.compile(tmpl.allMembers),
+			"allMembersNormal": hogan.compile(tmpl.allMembersNormal),
+			"listGroup": hogan.compile(tmpl.listGroup)
+		};
 	};
 	
 	Group.prototype.removeGroup = function(groupView, breaks){
@@ -149,7 +167,8 @@ define(function(require, exports, module) {
 		var hidden = false;
 		
 		//Most of the HTML is done in the template
-		groupView = $( $('#listGroup').render(gr) );
+		//groupView = $( $('#listGroup').render(gr) );
+		groupView = $( this.templates['listGroup'].render(gr) );
 		$('#myGroups').append(groupView);
 		
 		//Some html added after
@@ -206,7 +225,8 @@ define(function(require, exports, module) {
 		$('#detailsContainer').remove();
 		
 		//Append the edit-container, containing most of the html, to body
-		$('body').append( $('#detCont').render(gr) );
+		//$('body').append( $('#detCont').render(gr) );
+		$('body').append( $(this.templates['detCont'].render(gr)) );
 		
 		$('#groupBack').click(function(){
 			$('#detailsContainer').remove();mainContainer.show();
@@ -283,12 +303,14 @@ define(function(require, exports, module) {
 				if(gr.you.admin || gr.you.owner){
 					console.log('admin+admin');
 					$('#allMem').append(
-							$('#allMembers').render(gr.userlist[v], {gr:gr})
+							//$('#allMembers').render(gr.userlist[v], {gr:gr})
+							gr.templates['allMembers'].render(gr.userlist[v], {gr:gr})
 					);
 				}
 				else{
 					$('#allMem').append(
-							$('#allMembersNormal').render(gr.userlist[v], {gr:gr})
+							//$('#allMembersNormal').render(gr.userlist[v], {gr:gr})
+							gr.templates['allMembersNormal'].render(gr.userlist[v], {gr:gr})
 					);
 				}
 			}
@@ -297,12 +319,14 @@ define(function(require, exports, module) {
 			if(gr.userlist[v] && gr.admins.indexOf(v) == -1){
 				if(gr.you.admin || gr.you.owner){
 					$('#allMem').append(
-							$('#allMembers').render(gr.userlist[v], {gr:gr})
+							//$('#allMembers').render(gr.userlist[v], {gr:gr})
+							gr.templates['allMembers'].render(gr.userlist[v], {gr:gr})
 					);
 				}
 				else{
 					$('#allMem').append(
-							$('#allMembersNormal').render(gr.userlist[v], {gr:gr})
+							//$('#allMembersNormal').render(gr.userlist[v], {gr:gr})
+							gr.templates['allMembersNormal'].render(gr.userlist[v], {gr:gr})
 					);
 				}
 			}
@@ -505,7 +529,8 @@ define(function(require, exports, module) {
 	function administerGroup(group){
 		if(group=='new'){
 			$('#myModal').html(
-					$('#createGroupModal').render()
+					//$('#createGroupModal').render()
+					otherTemplates['createGroupModal'].render()
 			);
 			$('#saveChanges').click(function(){
 				if($('#newTitle').prop('value') != ''){

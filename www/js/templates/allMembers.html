@@ -1,0 +1,26 @@
+<tr>
+		<td>{{#admin}} 
+			<img src="img/admin.png" height="16" width="16"/> 
+			{{/admin}}
+			{{^admin}}
+				{{#member}}
+				<img src="img/user.png" height="16" width="16" />
+				{{/member}}
+			{{/admin}}
+						
+		</td>
+		<td>
+			{{name}}
+		</td>
+		<td>
+			{{mail}}
+		</td>
+		<td><button memid="{{userid}}" class="btn btn-danger btn-mini removeButton" onclick="console.log('{{userid}}');">X</button>
+		{{#admin}} <button memid="{{userid}}" class="btn btn-warning btn-mini demoteButton" onclick="console.log(this);">Demote</button>
+		{{/admin}}
+					
+		{{^admin}}
+			<button memid="{{userid}}" class="btn btn-success btn-mini promoteButton">Promote</button>
+		{{/admin}}
+		</td>
+</tr>

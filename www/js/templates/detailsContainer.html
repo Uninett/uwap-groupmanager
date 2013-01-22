@@ -1,0 +1,65 @@
+<div id="detailsContainer" class="container span8 offset2">
+	<div class="topNav">
+		<a id="groupBack" href="#">Groups</a> <span> &#62; {{id}} </span>
+	</div>
+	<div class="container" style="padding-left: 15px; padding-top: 10px;">
+		<div id="titleContainer">
+			<h1 id="titleHeader">{{title}}</h1>
+		</div>
+		<div id="descriptContainer">
+			<span id="descriptionSpan">{{description}}</span>
+		</div>
+		<div id="checkContainer">
+			<br />
+		</div>
+
+		<div>
+			<br />
+			<br />
+			<h2>Members</h2>
+			<table id="membersTable" class="table table-striped">
+				<thead>
+					<tr>
+						<th></th>
+						<th>Name</th>
+						<th>Mail</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody id="allMem">
+
+				</tbody>
+			</table>
+		</div>
+		
+		{{#you}}
+		{{#admin}}
+		<h2>Add</h2>
+		<div
+			style="border: 0px solid #DDD; background-color: white !important;">
+
+			<input
+				style="font-size: 16px; height: 18px; padding-top: 4px; padding-left: 9px; width: 300px"
+				class="search-query" id="peoplesearch"
+				placeholder="Type to search for people..." />
+
+		</div>
+		{{/admin}} 
+		{{^admin}} 
+			{{#owner}}
+				<h2>Add</h2>
+				<div style="border: 0px solid #DDD; background-color: white !important;">
+
+					<input
+						style="font-size: 16px; height: 18px; padding-top: 4px; padding-left: 9px; width: 300px"
+						class="search-query" id="peoplesearch"
+						placeholder="Type to search for people..." />
+
+				</div>
+			{{/owner}} 
+		{{/admin}} 
+		{{/you}} 
+		
+
+	</div>
+</div>
