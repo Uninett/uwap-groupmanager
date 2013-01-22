@@ -7,6 +7,7 @@ define(function(require, exports, module) {
 		UWAP = require('uwap-core/js/core');
 	
 	//require("lib/jsrender");
+	require("lib/director");
 	require("uwap-core/js/uwap-people");
 	require('uwap-core/bootstrap/js/bootstrap');	
 	require('uwap-core/bootstrap/js/bootstrap-collapse');
