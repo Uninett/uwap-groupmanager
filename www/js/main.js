@@ -14,13 +14,14 @@ define(function(require, exports, module) {
 	require('uwap-core/bootstrap/js/bootstrap-modal');
 	require('uwap-core/bootstrap/js/bootstrap-typeahead');
 	require('uwap-core/bootstrap/js/bootstrap-button');
+	require('uwap-core/bootstrap/js/bootstrap-tooltip');
 	
 	var tmpl = {
 		    "detCont": require('uwap-core/js/text!templates/detailsContainer.html'),
 		    "allMembers": require('uwap-core/js/text!templates/allMembers.html'),
 		    "allMembersNormal":  require('uwap-core/js/text!templates/allMembersNormal.html'),
 		    "createGroupModal": require('uwap-core/js/text!templates/createGroupModal.html'),
-		    "listGroup": require('uwap-core/js/text!templates/listGroup.html')
+		    "listGroup": require('uwap-core/js/text!templates/tableListGroup.html')
 	};
 	
 	var currentGroup = null;
@@ -110,6 +111,10 @@ define(function(require, exports, module) {
 		this.userlist[member].admin = true;
 		UWAP.groups.updateMember(this.id, member, {'admin': true}, function(){
 			gr.allMembersView();
+			if(member == gr.me.userid){
+//				gr.listView();
+				gr.groupView.children().first().empty().append('<a href="#" class="adminIcon" rel="tooltip" title="You are an administrator in this group"><img src="img/admin.png" alt="Admin" height="16" width="16"/></a> ').children().first().tooltip();
+			}
 		}, updateError);
 	};
 	
@@ -122,6 +127,8 @@ define(function(require, exports, module) {
 		if(admin == this.me.userid){
 			console.log('Remaking editor since user has demoted himself..');
 			gr.editView();
+//			gr.listView();
+			gr.groupView.children().first().empty().append('<a href="#" class="memberIcon" rel="tooltip" title="You are a regular member of this group"><img src="img/user.png" alt="Member" height="16" width="16" /></a>').children().first().tooltip();
 		}
 		
 		UWAP.groups.updateMember(this.id, admin, {'admin': false}, function(){
@@ -170,26 +177,27 @@ define(function(require, exports, module) {
 		//Most of the HTML is done in the template
 		//groupView = $( $('#listGroup').render(gr) );
 		groupView = $( this.templates['listGroup'].render(gr) );
-		$('#myGroups').append(groupView);
+		$('#groupsTable').append(groupView);
 		
 		//Some html added after
 		if(this.admin == false && this.owner == false){
 			if(this.listmembers){
 				var gr = this;
-				$('<a href="#/groups/'+gr.id+'" class="btn btn-success btn-mini groupMargin">Info</a>').click(function(){
+				$('<a href="#/groups/'+gr.id+'" class="btn btn-success btn-mini groupMargin">View info</a>').click(function(){
 
-				}).appendTo(groupView);
+				}).appendTo(groupView.children().last());
 			}
 			
 		}
 		else{
 			var gr = this;
+			console.log(groupView.children().last());
 			$('<a href="#/groups/'+gr.id+'" class="btn btn-primary btn-mini groupMargin">Edit</a>').click(function(){
 
-			}).appendTo(groupView);
+			}).appendTo(groupView.children().last());
 			$('<a href="javascript:void(0)" class="btn btn-danger btn-mini">Delete</a>').click(function(){
 				gr.removeGroup(groupView, breaks);
-			}).appendTo(groupView);
+			}).appendTo(groupView.children().last());
 			
 		}
 		$('<div class="bottomOfGV"></div>').appendTo(groupView);
@@ -217,6 +225,8 @@ define(function(require, exports, module) {
 			
 		});
 		
+		$('.memberIcon').tooltip();
+		$('.adminIcon').tooltip();
 	};
 	
 	//Opens an info/edit-page for the group. 
