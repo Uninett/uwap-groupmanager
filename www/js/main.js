@@ -39,12 +39,14 @@ define(function(require, exports, module) {
 	};
 	
 	// Model for groups
-	var Group = function(id, title, adminBool, memberBool, ownerBool, listMembersBool, description){
+	var Group = function(id, title, myBool, subscribed, adminBool, memberBool, ownerBool, listMembersBool, description){
 		this.id = id;
 		this.title = title;
 		if(description){
 			this.description = description;	
 		}
+		this.myBool = myBool;
+		this.subscribed = subscribed;
 		this.admin = adminBool;
 		this.member = memberBool;
 		this.owner = ownerBool;
@@ -99,9 +101,13 @@ define(function(require, exports, module) {
 				gr.members.push(member.userid[0]);
 				gr.userlist[member.userid[0]] = {"admin": false, "member": true, "name": member.name[0], "userid": member.userid[0], "mail": member.mail[0] };
 				gr.allMembersView();
+//				if(member == gr.me.userid){
+//					alert('The group will appear in the list whey you reload.');
+//				}
 			}, function(err){
 				alert(err);
 			});
+			
 		}
 	};
 	
@@ -137,7 +143,13 @@ define(function(require, exports, module) {
 	};
 	
 	Group.prototype.removeMember = function(member){
+		
 		var gr = this;
+		if(member == gr.me.userid){
+			if(!confirm('This will remove the group from your list when you reload!')){
+				return;
+			}
+		}
 		var tempMem = this.members.indexOf(member);
 		if(tempMem!=-1) this.members.splice(tempMem, 1);
 		delete this.userlist[member];
@@ -147,8 +159,14 @@ define(function(require, exports, module) {
 			gr.allMembersView();
 			$("#peoplesearch").keyup();
 			if(member == gr.me.userid){
-				gr.listView();
+				//gr.listView();
 				gr.editView();
+//				gr.removeGroup(gr.groupView, gr.breaks);
+				if(gr.owner){
+					
+//					gr.groupView.remove();
+//					$('#groupBack').click();
+				}
 			}
 		}, updateError);
 	};
@@ -167,6 +185,30 @@ define(function(require, exports, module) {
 		UWAP.groups.updateGroup(this.id, {'title': newName}, updateSuccess, updateError);
 	};
 	
+	Group.prototype.subscribe = function(){
+		var gr = this;
+		UWAP.groups.subscribe(this.id, function(d){
+			gr.groupView.children().last().children().last().remove();
+			$('<a href="javascript:void(0)" class="btn btn-success btn-mini groupMargin">Unsubscribe</a>').click(function(){
+				gr.unSubscribe();
+			}).appendTo(gr.groupView.children().last());
+		}, function(err){
+			console.log(err);
+		});
+	};
+	
+	Group.prototype.unSubscribe = function() {
+		var gr = this;
+		UWAP.groups.unsubscribe(this.id, function(d){
+			gr.groupView.children().last().children().last().remove();
+			$('<a href="javascript:void(0)" class="btn btn-mini groupMargin">Subscribe</a>').click(function(){
+				gr.subscribe();
+		}).appendTo(gr.groupView.children().last());
+		}, function(err){
+			console.log(err);
+		});
+	};
+	
 		
 	//Adds the group to the list, and handles events.
 	Group.prototype.listView = function(){
@@ -177,7 +219,13 @@ define(function(require, exports, module) {
 		//Most of the HTML is done in the template
 		//groupView = $( $('#listGroup').render(gr) );
 		groupView = $( this.templates['listGroup'].render(gr) );
-		$('#groupsTable').append(groupView);
+		if(gr.myBool){
+			$('#groupsTable').append(groupView);
+		}
+		else{
+			$('#publicTable').append(groupView);
+		}
+		
 		
 		//Some html added after
 		if(this.admin == false && this.owner == false){
@@ -200,7 +248,22 @@ define(function(require, exports, module) {
 			}).appendTo(groupView.children().last());
 			
 		}
-		$('<div class="bottomOfGV"></div>').appendTo(groupView);
+		if(!this.myBool){
+			var gr = this;
+			if(gr.subscribed){
+				$('<a href="javascript:void(0)" class="btn btn-success btn-mini groupMargin">Unsubscribe</a>').click(function(){
+					gr.unSubscribe();
+			}).appendTo(groupView.children().last());
+			}
+			else{
+				$('<a href="javascript:void(0)" class="btn btn-mini groupMargin">Subscribe</a>').click(function(){
+					gr.subscribe();
+			}).appendTo(groupView.children().last());
+			}
+			
+		}
+		
+//		$('<div class="bottomOfGV"></div>').appendTo(groupView);
 		var breaks = $('<br /><br /><br />').appendTo('#myGroups');
 		this.breaks = breaks;
 		this.groupView = groupView;
@@ -474,6 +537,7 @@ define(function(require, exports, module) {
 		 
 		$('#myGroups').html('');
 		$('#myOwnGroups').html('');
+		var meinListed = false;
 		UWAP.groups.listMyGroups(function(d){
 			if(d){
 				$.each(d, function(i, v){
@@ -486,10 +550,10 @@ define(function(require, exports, module) {
 					else{
 						var dGroup;
 						if(v.description){
-							dGroup = new Group(v.id, v.title, v.admin, v.member, v.owner, v.listmembers, v.description);	
+							dGroup = new Group(v.id, v.title, true, false, v.admin, v.member, v.owner, v.listmembers, v.description);	
 						}
 						else{
-							dGroup = new Group(v.id, v.title, v.admin, v.member, v.owner, v.listmembers);
+							dGroup = new Group(v.id, v.title, true, false, v.admin, v.member, v.owner, v.listmembers);
 						}
 						if(v.listing){
 							dGroup.listing = v.listing;
@@ -499,9 +563,32 @@ define(function(require, exports, module) {
 						dGroup.listView();
 					}
 				});
+				
 			}
+			meinListed=true;
 			
 		});
+		
+		UWAP.groups.listPublic(function(d){
+			console.log(d);
+			
+			$.each(d, function(i,v){
+				var dGroup;
+				if(v.description){
+					dGroup = new Group(v.id, v.title, false, v.subscribed, v.admin, v.member, v.owner, v.listmembers, v.description);	
+				}
+				else{
+					dGroup = new Group(v.id, v.title, false, v.subscribed, v.admin, v.member, v.owner, v.listmembers);
+				}
+				if(v.listing){
+					dGroup.listing = v.listing;
+				}
+				console.log(dGroup);
+				myGroups.push(dGroup);
+				dGroup.listView();
+			});
+		});
+		
 		var search = $('#searchInput').change(function(){console.log('inputChanged')});
 		var sCancel = $('#searchCancel').click(function(){search.val(''); search.focus(); console.log('searchCancelled');});
 		search.keyup(function(e){
@@ -535,6 +622,8 @@ define(function(require, exports, module) {
 		});
 		
 	}
+	
+	
 	
 	//Now only does the create group-modal
 	function administerGroup(group){

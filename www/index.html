@@ -183,7 +183,11 @@ table .headerSortUp:after {
 		</div>
 
 		<div class="container" id="mainContainer">
-			
+<!-- 			<div class="span4">List <select> -->
+<!-- 			<option value="my groups and public groups">my groups and public groups</option> -->
+<!-- 			<option value="only my groups">only my groups</option> -->
+<!-- 			<option value="only subscriptions">only public groups</option> -->
+<!-- 			</select></div> -->
 			<div class="span4 offset2" style="border: 1px solid #DDD; width:310px; float:left; -moz-border-radius: 10px; -webkit-border-radius:10px; border-radius: 10px;  font-size: 20px; padding: 2px 4px; outline: 0; -webkit-appearance:none;" id="searchDiv" align="center">
     			<img height="16px" width="16px" src=" img/search.png" id="searchIcon"/>
     			<input style="border: none; width:255px; padding-top:3px; font-size:16px;" id="searchInput" placeholder="Type to filter..."/>
@@ -199,13 +203,28 @@ table .headerSortUp:after {
 <!-- 				<div id="myGroups"> -->
 				
 <!-- 				</div> -->
-				<div id="myTableGroups">
+				<div id="myTableGroups" class="span12">
 					<table id="groupsTable" class="table table-striped">
 						<thead>
 							<tr>
 								<th>Role</th>
 								<th>Group</th>
 								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody id="allGr">
+
+						</tbody>
+					
+					</table>
+				</div>
+				<div id="publicGroups" class="span12">
+					<table id="publicTable" class="table table-striped">
+						<thead>
+							<tr>
+								<th></th>
+								<th></th>
+								<th></th>
 							</tr>
 						</thead>
 						<tbody id="allGr">
