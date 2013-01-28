@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Groupmanager running in UNINETT WebApp Park</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+<meta charset="utf-8">
+<title>Groupmanager running in UNINETT WebApp Park</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 
 <style>
@@ -15,8 +15,15 @@ body {
 #searchDiv div:focus {
 	border: 1px solid #F88;
 }
+#searchDiv2 div:focus {
+	border: 1px solid #F88;
+}
 
 #searchInput input:focus {
+	border: none !important;
+	outline: none;
+}
+#searchInput2 input:focus {
 	border: none !important;
 	outline: none;
 }
@@ -47,6 +54,20 @@ input:focus {
 	
 }
 
+.groupView {
+	text-align: right;
+	
+}
+.actionButtons {
+	text-align: right;
+	float: right;
+}
+.buttonTD {
+	text-align: right;
+}
+.groupMargin {
+	float: right;
+}
 /* .groupView { */
 /* 	border-left-color: #000; */
 /* 	border-left-width: 2px; */
@@ -77,13 +98,22 @@ input:focus {
 /* .groupMargin { */
 /* 	margin-left: 5px; */
 /* } */
-
 #detailsContainer {
 	align: center;
 }
 
 #peoplelist li {
 	border-top: 1px solid #eee;
+}
+
+table h4 {
+	margin-top: 0;
+	margin-bottom: 4px;
+}
+
+caption h4 {
+	margin-bottom: -10px;
+	margin-top: 20px;
 }
 
 .topNav {
@@ -94,6 +124,9 @@ input:focus {
 	border-bottom-width: 1px;
 	border-bottom-style: solid;
 }
+table td:last{
+	align:right;
+}
 
 table .header {
 	cursor: pointer;
@@ -102,7 +135,7 @@ table .header {
 table .header:after {
 	content: "";
 	float: right;
-	margin-top: 7px;
+	margin-top: 2px;
 	border-width: 0 4px 4px;
 	border-style: solid;
 	border-color: #000000 transparent;
@@ -120,7 +153,7 @@ table .header:hover:after {
 
 table .headerSortDown:after,table .headerSortDown:hover:after {
 	visibility: visible;
-	filter: alpha(opacity =       60);
+	filter: alpha(opacity =           60);
 	-moz-opacity: 0.6;
 	opacity: 0.6;
 }
@@ -134,108 +167,223 @@ table .headerSortUp:after {
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
-	filter: alpha(opacity =       60);
+	filter: alpha(opacity =           60);
 	-moz-opacity: 0.6;
 	opacity: 0.6;
 }
 </style>
 
-		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-		<!--[if lt IE 9]>
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
 			<script src="/js/bootstrap/html5.js"></script>
 		<![endif]-->
 
-		<!-- Core API to UNINETT WebApp Park -->
+<!-- Core API to UNINETT WebApp Park -->
 
-		<!-- data-main attribute tells require.js to load
+<!-- data-main attribute tells require.js to load
 		scripts/main.js after require.js loads. -->
-		<script type="text/javascript" data-main="main" src="/_/js/require.js"></script>
+<script type="text/javascript" data-main="main" src="/_/js/require.js"></script>
 <!-- 		<script src="js/lib/director-1.1.6.min.js"></script> -->
 <!-- 		<script src="js/lib/jquery.tablesorter.js"></script> -->
 
 
 <!-- Le fav and touch icons -->
-		<link rel="shortcut icon" href="/ico/favicon.ico">
-		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/ico/apple-touch-icon-144-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
-	</head>
+<link rel="shortcut icon" href="/ico/favicon.ico">
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+	href="/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114"
+	href="/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72"
+	href="/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed"
+	href="/ico/apple-touch-icon-57-precomposed.png">
+</head>
 
-	<body>
+<body>
 
-		<div class="navbar navbar-fixed-top">
-			<div class="navbar-inner">
-				<div class="container">
-					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</a>
-					<a class="brand" id="brandTitle" href="#">Groupmanager</a>
-					<div class="nav-collapse">
-						<ul class="nav">
-<!-- 							<li class="active"><a href="#">Home</a></li> -->
-						</ul>
-					</div><!--/.nav-collapse -->
+	<div class="navbar navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse"
+					data-target=".nav-collapse"> <span class="icon-bar"></span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span>
+				</a> <a class="brand" id="brandTitle" href="#">Groupmanager</a>
+				<div class="nav-collapse">
+					<ul class="nav">
+						<!-- 							<li class="active"><a href="#">Home</a></li> -->
+					</ul>
 				</div>
+				<!--/.nav-collapse -->
 			</div>
 		</div>
+	</div>
 
-		<div class="container" id="mainContainer">
-<!-- 			<div class="span4">List <select> -->
-<!-- 			<option value="my groups and public groups">my groups and public groups</option> -->
-<!-- 			<option value="only my groups">only my groups</option> -->
-<!-- 			<option value="only subscriptions">only public groups</option> -->
-<!-- 			</select></div> -->
-			<div class="span4 offset2" style="border: 1px solid #DDD; width:310px; float:left; -moz-border-radius: 10px; -webkit-border-radius:10px; border-radius: 10px;  font-size: 20px; padding: 2px 4px; outline: 0; -webkit-appearance:none;" id="searchDiv" align="center">
-    			<img height="16px" width="16px" src=" img/search.png" id="searchIcon"/>
-    			<input style="border: none; width:255px; padding-top:3px; font-size:16px;" id="searchInput" placeholder="Type to filter..."/>
-<!--     			<img src="img/cancel.png" id="searchCancel"/> -->
-    			<a href="javascript:void(0)"  id="searchCancel" class="btn btn-danger btn-mini">X</a>
-			</div>
-			<div id="managecontainer">
-			<div><div id="myOwnGroups"></div>
-			<div><a class="btn btn-small" href="javascript:void(0)" id="addOwnGroup" style="float:left; margin-left:20px; margin-top:2px; padding-left:-5px; " ><i class="icon-plus"></i> Create group</a></div>
-			</div>
-			<div style="display:block;" >
-			<br /><br /><br />
-<!-- 				<div id="myGroups"> -->
-				
-<!-- 				</div> -->
-				<div id="myTableGroups" class="span12">
+	<div class="container" id="mainContainer">
+		<!-- 			<div class="span4">List <select> -->
+		<!-- 			<option value="my groups and public groups">my groups and public groups</option> -->
+		<!-- 			<option value="only my groups">only my groups</option> -->
+		<!-- 			<option value="only subscriptions">only public groups</option> -->
+		<!-- 			</select></div> -->
+		<ul class="nav nav-tabs" id="groupTabs">
+			<li class="active"><a href="#own" data-toggle="tab">Group Membership</a></li>
+			<li><a href="#sub" data-toggle="tab">Group Subscriptions</a></li>
+		</ul>
+		<!-- 		<div  style="align: center" align="center"></div> -->
+		<!-- 		<div id="managecontainer" > -->
+		<!-- 			<div> -->
+		<!-- 				<div id="myOwnGroups"></div> -->
+		<!-- 				<div> -->
+		<!-- 					<a class="btn btn-small" href="javascript:void(0)" id="addOwnGroup" -->
+		<!-- 						style="float: left; margin-left: 20px; margin-top: 2px; padding-left: -5px;"><i -->
+		<!-- 						class="icon-plus"></i> Create group</a> -->
+		<!-- 				</div> -->
+		<!-- 			</div> -->
+		<div style="display: block;" class="tab-content">
+			<!-- 				<br /> -->
+			<!-- 				<br /> -->
+			<!-- 				<br /> -->
+			<!-- 				<div id="myGroups"> -->
+
+			<!-- 				</div> -->
+			<div class="tab-pane active" id="own">
+				<div class="span4 offset3"
+					style="border: 1px solid #DDD; width: 310px; float: left; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px; font-size: 20px; padding: 2px 4px; outline: 0; -webkit-appearance: none;"
+					id="searchDiv" align="center">
+					<img height="16px" width="16px" src=" img/search.png"
+						id="searchIcon" /> <input
+						style="border: none; width: 255px; padding-top: 3px; font-size: 16px;"
+						id="searchInput" placeholder="Type to filter..." />
+					<!--     			<img src="img/cancel.png" id="searchCancel"/> -->
+					<a href="javascript:void(0)" id="searchCancel"
+						class="btn btn-danger btn-mini">X</a>
+				</div>
+				<div id="managecontainer">
+					<div>
+						<div id="myOwnGroups"></div>
+						<div>
+							<a class="btn btn-small" href="javascript:void(0)"
+								id="addOwnGroup"
+								style="float: left; margin-left: 20px; margin-top: 2px; padding-left: -5px;"><i
+								class="icon-plus"></i> Create group</a>
+						</div>
+					</div>
+
 					<table id="groupsTable" class="table table-striped">
 						<thead>
 							<tr>
-								<th>Role</th>
-								<th>Group</th>
-								<th>Actions</th>
+								<th width="40px" align="center"></th>
+								<th></th>
+								<th width="20%"></th>
 							</tr>
 						</thead>
 						<tbody id="allGr">
 
 						</tbody>
-					
+
 					</table>
-				</div>
-				<div id="publicGroups" class="span12">
-					<table id="publicTable" class="table table-striped">
+					<table id="ownerTable" class="table table-striped">
 						<thead>
 							<tr>
+								
+								<th width="40px" align="center"></th>
 								<th></th>
-								<th></th>
-								<th></th>
+								<th width="20%"></th>
 							</tr>
 						</thead>
+						<caption><h4>Owner</h4></caption>
 						<tbody id="allGr">
 
 						</tbody>
-					
+
 					</table>
+					<table id="adminTable" class="table table-striped">
+						<thead>
+							<tr> 
+								<th width="40px" align="center"></th>
+								<th></th>
+								<th width="20%"></th>
+							</tr>
+						</thead>
+						<caption><h4>Administrator</h4></caption>
+						<tbody id="allGr">
+
+						</tbody>
+
+					</table>
+					
+					<table id="regularTable" class="table table-striped">
+						<thead>
+							<tr>
+								<th width="40px" align="center"></th>
+								<th></th>
+								<th width="20%"></th>
+							</tr>
+						</thead>
+						<caption><h4>Regular Member</h4></caption>
+						<tbody id="allGr">
+
+						</tbody>
+
+					</table>
+					
+					<table id="nonTable" class="table table-striped">
+						<thead>
+							<tr>
+								<th width="40px" align="center"></th>
+								<th></th>
+								<th width="20%"></th>
+							</tr>
+						</thead>
+						<caption><h4>Not Ad-Hoc</h4></caption>
+						<tbody id="allGr">
+
+						</tbody>
+
+					</table>
+					
+					
 				</div>
 			</div>
+			<div class="tab-pane" id="sub">
+				<div class="span4 offset3"
+					style="border: 1px solid #DDD; width: 310px; float: left; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px; font-size: 20px; padding: 2px 4px; outline: 0; -webkit-appearance: none;"
+					id="searchDiv2" align="center">
+					<img height="16px" width="16px" src=" img/search.png"
+						id="searchIcon2" /> <input
+						style="border: none; width: 255px; padding-top: 3px; font-size: 16px;"
+						id="searchInput2" placeholder="Type to filter..." />
+					<!--     			<img src="img/cancel.png" id="searchCancel"/> -->
+					<a href="javascript:void(0)" id="searchCancel2"
+						class="btn btn-danger btn-mini">X</a>
+				</div>
+				<!-- 						<div id="managecontainer"> -->
+				<!-- 							<div> -->
+				<!-- 								<div id="myOwnGroups"></div> -->
+				<!-- 								<div> -->
+				<!-- 									<a class="btn btn-small" href="javascript:void(0)" -->
+				<!-- 										id="addOwnGroup" -->
+				<!-- 										style="float: left; margin-left: 20px; margin-top: 2px; padding-left: -5px;"><i -->
+				<!-- 										class="icon-plus"></i> Create group</a> -->
+				<!-- 								</div> -->
+				<!-- 							</div> -->
+
+				<table id="publicTable" class="table table-striped">
+					<thead>
+						<tr>
+							<th></th>
+							<th></th>
+							<th width="20%"></th>
+						</tr>
+					</thead>
+					<tbody id="allGr">
+
+					</tbody>
+
+				</table>
+			</div>
 			
-			<div class="modal hide" id="myModal">
+		</div>
+		<div class="modal hide" id="myModal">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal">×</button>
 					<h3>Modal header</h3>
@@ -248,21 +396,20 @@ table .headerSortUp:after {
 						class="btn btn-primary">Save</a>
 				</div>
 			</div>
-		</div>
+	</div>
+	<!-- /container -->
 
-		</div> <!-- /container -->
-		
-		
-		
-		
-		<!-- ========================================================== -->
-		<!-- Placed at the end of the document so the pages load faster -->
-<!-- 		<script src="/js/bootstrap/bootstrap-collapse.js"></script> -->
-<!-- 		<script src="/js/bootstrap/bootstrap-modal.js"></script> -->
-<!-- 		<script src="/js/bootstrap/bootstrap-typeahead.js"></script> -->
-<!-- 		<script src="/js/bootstrap/bootstrap-button.js"></script> -->
-	
-		<!--
+
+
+
+	<!-- ========================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<!-- 		<script src="/js/bootstrap/bootstrap-collapse.js"></script> -->
+	<!-- 		<script src="/js/bootstrap/bootstrap-modal.js"></script> -->
+	<!-- 		<script src="/js/bootstrap/bootstrap-typeahead.js"></script> -->
+	<!-- 		<script src="/js/bootstrap/bootstrap-button.js"></script> -->
+
+	<!--
 			Add only the ones you are using.
 
 		<script src="/js/bootstrap/bootstrap-transition.js"></script>
@@ -275,5 +422,5 @@ table .headerSortUp:after {
 		<script src="/js/bootstrap/bootstrap-carousel.js"></script>
 		
 		-->
-	</body>
+</body>
 </html>

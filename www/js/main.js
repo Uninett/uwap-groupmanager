@@ -15,6 +15,7 @@ define(function(require, exports, module) {
 	require('uwap-core/bootstrap/js/bootstrap-typeahead');
 	require('uwap-core/bootstrap/js/bootstrap-button');
 	require('uwap-core/bootstrap/js/bootstrap-tooltip');
+	require('uwap-core/bootstrap/js/bootstrap-tab');
 	
 	var tmpl = {
 		    "detCont": require('uwap-core/js/text!templates/detailsContainer.html'),
@@ -221,6 +222,19 @@ define(function(require, exports, module) {
 		groupView = $( this.templates['listGroup'].render(gr) );
 		if(gr.myBool){
 			$('#groupsTable').append(groupView);
+			if(gr.owner){
+				$('#ownerTable').append(groupView);
+			}
+			else if(gr.admin){
+				$('#adminTable').append(groupView);
+			}
+			else if(gr.member){
+				$('#regularTable').append(groupView);
+			}
+			else{
+				$('#nonTable').append(groupView);
+			}
+			
 		}
 		else{
 			$('#publicTable').append(groupView);
@@ -243,7 +257,7 @@ define(function(require, exports, module) {
 			$('<a href="#/groups/'+gr.id+'" class="btn btn-primary btn-mini groupMargin">Edit</a>').click(function(){
 
 			}).appendTo(groupView.children().last());
-			$('<a href="javascript:void(0)" class="btn btn-danger btn-mini">Delete</a>').click(function(){
+			$('<a href="javascript:void(0)" class="btn btn-danger btn-mini groupMargin">Delete</a>').click(function(){
 				gr.removeGroup(groupView, breaks);
 			}).appendTo(groupView.children().last());
 			
@@ -267,26 +281,50 @@ define(function(require, exports, module) {
 		var breaks = $('<br /><br /><br />').appendTo('#myGroups');
 		this.breaks = breaks;
 		this.groupView = groupView;
-		
-		var search = $('#searchInput').keyup(function(){
-			if(gr.description && gr.title.toLowerCase().indexOf(this.value.toLowerCase()) == -1 && gr.description.toLowerCase().indexOf(this.value.toLowerCase()) == -1){
-					
-				hidden = true;
-				groupView.hide('fast');
-				breaks.hide();
-			}
-			else if(!gr.description && gr.title.toLowerCase().indexOf(this.value.toLowerCase()) == -1 ){
-				hidden = true;
-				groupView.hide('fast');
-				breaks.hide();
-			}
-			else if(hidden){
-				hidden = false;
-				groupView.show('fast');
-				breaks.show();
-			}
+		if(gr.myBool){
+			var search = $('#searchInput').keyup(function(){
+				if(gr.description && gr.title.toLowerCase().indexOf(this.value.toLowerCase()) == -1 && gr.description.toLowerCase().indexOf(this.value.toLowerCase()) == -1){
+						
+					hidden = true;
+					groupView.hide('fast');
+					breaks.hide();
+				}
+				else if(!gr.description && gr.title.toLowerCase().indexOf(this.value.toLowerCase()) == -1 ){
+					hidden = true;
+					groupView.hide('fast');
+					breaks.hide();
+				}
+				else if(hidden){
+					hidden = false;
+					groupView.show('fast');
+					breaks.show();
+				}
+				
+			});
 			
-		});
+		}
+		else{
+			var search = $('#searchInput2').keyup(function(){
+				if(gr.description && gr.title.toLowerCase().indexOf(this.value.toLowerCase()) == -1 && gr.description.toLowerCase().indexOf(this.value.toLowerCase()) == -1){
+						
+					hidden = true;
+					groupView.hide('fast');
+					breaks.hide();
+				}
+				else if(!gr.description && gr.title.toLowerCase().indexOf(this.value.toLowerCase()) == -1 ){
+					hidden = true;
+					groupView.hide('fast');
+					breaks.hide();
+				}
+				else if(hidden){
+					hidden = false;
+					groupView.show('fast');
+					breaks.show();
+				}
+				
+			});
+		}
+		
 		
 		$('.memberIcon').tooltip();
 		$('.adminIcon').tooltip();
@@ -524,11 +562,16 @@ define(function(require, exports, module) {
 		var newHandler = function(){
 			administerGroup('new');
 		};
-
+		
+		var testHandler = function(){
+			console.log('testhandler');
+		};
 		//Router from: https://github.com/flatiron/director
 		var routes = {
 				 '/groups/:id': groupHandler,
-				 '/new': newHandler
+				 '/new': newHandler,
+				 '': testHandler,
+				 'default': testHandler
 		 };
 
 		 var router = Router(routes);
@@ -616,9 +659,54 @@ define(function(require, exports, module) {
 		});
 		search.focus();
 		
+		
+		var search2 = $('#searchInput2').change(function(){console.log('inputChanged')});
+		var sCancel2 = $('#searchCancel2').click(function(){search2.val(''); search2.focus(); console.log('searchCancelled');}).css("opacity", "0.6");
+		search2.keyup(function(e){
+			if(search2.val().length > 0){
+				sCancel2.css("opacity", "1.0");
+			}
+			else{
+				sCancel2.css("opacity", "0.6");
+			}
+			//27 is escape-key
+			if(e.which == 27){
+				sCancel2.click();
+			}
+		});
+		search2.focus(function(){
+			search2.keyup();
+		});
+		
+		var sd2 = $('#searchDiv2');
+		search2.focus(function(){
+			sd2.css('border-color', '#DDAA22');
+		});
+		search2.blur(function(){
+			sd2.css('border-color', '#DDD');
+		});
+		
+		
 		$('#addOwnGroup').click(function(){
 			administerGroup('new');
 			$('#newTitle').focus();
+		});
+		
+//		$('#groupTabs a:first').click(function(e){
+////			e.preventDefault();
+////			$(this).tab('show');
+//			search.focus();
+//		});
+//		$('#groupTabs a:last').click(function(e){
+////			e.preventDefault();
+////			$(this).tab('show');
+//			search2.focus();
+//		});
+		$('a[href="#own"]').on("shown", function(e){
+			search.focus();
+		});
+		$('a[href="#sub"]').on("shown", function(e){
+			search2.focus();
 		});
 		
 	}
@@ -638,10 +726,10 @@ define(function(require, exports, module) {
 						function(d){
 					var dGroup;
 					if(d.description){
-						dGroup = new Group(d.id, d.title, d.you.admin, d.you.member, d.you.owner, true, d.description);	
+						dGroup = new Group(d.id, d.title, true, false, d.you.admin, d.you.member, d.you.owner, true, d.description);	
 					}
 					else{
-						dGroup = new Group(d.id, d.title, d.you.admin, d.you.member, d.you.owner, true);
+						dGroup = new Group(d.id, d.title, true, false, d.you.admin, d.you.member, d.you.owner, true);
 					}
 					if(d.listable !=undefined){
 						dGroup.listable = d.listable;
