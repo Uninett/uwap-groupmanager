@@ -26,6 +26,10 @@ define(function(require, exports, module) {
 	};
 	
 	var currentGroup = null;
+	var ownGroups = 0;
+	var adminGroups = 0;
+	var regGroups = 0;
+	var nonGroups = 0;
 	
 	$(document).ready(function() {
 
@@ -223,15 +227,19 @@ define(function(require, exports, module) {
 		if(gr.myBool){
 			$('#groupsTable').append(groupView);
 			if(gr.owner){
+				ownGroups++;
 				$('#ownerTable').append(groupView);
 			}
 			else if(gr.admin){
+				adminGroups++;
 				$('#adminTable').append(groupView);
 			}
 			else if(gr.member){
+				regGroups++;
 				$('#regularTable').append(groupView);
 			}
 			else{
+				nonGroups++;
 				$('#nonTable').append(groupView);
 			}
 			
@@ -240,7 +248,7 @@ define(function(require, exports, module) {
 			$('#publicTable').append(groupView);
 		}
 		
-		
+		var gr = this;
 		//Some html added after
 		if(this.admin == false && this.owner == false){
 			if(this.listmembers){
@@ -252,7 +260,7 @@ define(function(require, exports, module) {
 			
 		}
 		else{
-			var gr = this;
+			
 			console.log(groupView.children().last());
 			$('<a href="#/groups/'+gr.id+'" class="btn btn-primary btn-mini groupMargin">Edit</a>').click(function(){
 
@@ -263,7 +271,7 @@ define(function(require, exports, module) {
 			
 		}
 		if(!this.myBool){
-			var gr = this;
+			
 			if(gr.subscribed){
 				$('<a href="javascript:void(0)" class="btn btn-success btn-mini groupMargin">Unsubscribe</a>').click(function(){
 					gr.unSubscribe();
@@ -283,18 +291,61 @@ define(function(require, exports, module) {
 		this.groupView = groupView;
 		if(gr.myBool){
 			var search = $('#searchInput').keyup(function(){
+				headerView();
 				if(gr.description && gr.title.toLowerCase().indexOf(this.value.toLowerCase()) == -1 && gr.description.toLowerCase().indexOf(this.value.toLowerCase()) == -1){
-						
+					if(hidden == false){
+						if(gr.owner){
+							ownGroups--;
+						}
+						else if(gr.admin){
+							adminGroups--;
+						}
+						else if(gr.member){
+							memberGroups--;
+						}
+						else{
+							nonGroups--;
+						}
+					}	
 					hidden = true;
 					groupView.hide('fast');
 					breaks.hide();
 				}
 				else if(!gr.description && gr.title.toLowerCase().indexOf(this.value.toLowerCase()) == -1 ){
+					if(hidden == false){
+						if(gr.owner){
+							ownGroups--;
+						}
+						else if(gr.admin){
+							adminGroups--;
+						}
+						else if(gr.member){
+							memberGroups--;
+						}
+						else{
+							nonGroups--;
+						}
+					}
+					
 					hidden = true;
 					groupView.hide('fast');
 					breaks.hide();
 				}
 				else if(hidden){
+					if(hidden == true){
+						if(gr.owner){
+							ownGroups++;
+						}
+						else if(gr.admin){
+							adminGroups++;
+						}
+						else if(gr.member){
+							memberGroups++;
+						}
+						else{
+							nonGroups++;
+						}
+					}
 					hidden = false;
 					groupView.show('fast');
 					breaks.show();
@@ -529,7 +580,42 @@ define(function(require, exports, module) {
 		}
 	}
 	
+	function headerView(){
+		var ownTable = $('#ownerTable');
+		var adminTable = $('#adminTable');
+		var regularTable = $('#regularTable');
+		var nonTable = $('#nonTable');
+		
+		console.log(ownTable.find('tr').length);
+		
+		if(ownGroups == 0){
+			ownTable.find('caption').hide();
+		}
+		else{
+			ownTable.find('caption').show();
+		}
+		if(adminGroups == 0){
+			adminTable.find('caption').hide();
+		}
+		else{
+			adminTable.find('caption').show();
+		}
+		if(regGroups == 0){
+			regularTable.find('caption').hide();
+		}
+		else{
+			regularTable.find('caption').show();
+		}
+		if(nonGroups == 0){
+			nonTable.find('caption').hide();
+		}
+		else{
+			nonTable.find('caption').show();
+		}
+	}
+	
 	function init(u){
+		
 		 var  groupHandler = function(id){
 			 UWAP.groups.get(id, function(d){
 				 if(d==null){
@@ -572,6 +658,7 @@ define(function(require, exports, module) {
 				 '/new': newHandler,
 				 '': testHandler,
 				 'default': testHandler
+				 
 		 };
 
 		 var router = Router(routes);
@@ -606,13 +693,14 @@ define(function(require, exports, module) {
 						dGroup.listView();
 					}
 				});
-				
+				headerView();
 			}
 			meinListed=true;
 			
 		});
 		
 		UWAP.groups.listPublic(function(d){
+			
 			console.log(d);
 			
 			$.each(d, function(i,v){
@@ -709,8 +797,25 @@ define(function(require, exports, module) {
 			search2.focus();
 		});
 		
+//		window.onhashchange = lhChange();
+		window.addEventListener('hashchange', lhChange, false);
 	}
 	
+	function lhChange(){
+		
+		if(location.hash == ''){
+			console.log('dostuff');
+			try{
+				$('#groupBack').click();
+			}
+			catch(ex){
+				console.log('weird hash stuff');
+			}
+		}
+		else{
+			console.log(location.hash);
+		}
+	}
 	
 	
 	//Now only does the create group-modal
